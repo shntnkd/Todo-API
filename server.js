@@ -26,12 +26,13 @@ app.get('/todos/:id',function(req,res) {
 			matchedToDo=todo;
 		}
 	});*/
-
+	
 	if (matchedToDo){
 		res.json(matchedToDo);
 	}else{
 		res.status(404).send();
 	}
+	
 })
 app.post('/todos',function(req,res) {
 	 var body=_.pick(req.body,'description','completed');
@@ -49,6 +50,22 @@ app.post('/todos',function(req,res) {
 	res.json(body);
 
 });
+
+app.delete('/todos/:id',function(req,res) {
+	var todoId = parseInt(req.params.id,10);
+	var matchedToDo = _.findWhere(todos,{id:todoId});
+	if(!matchedToDo){
+		res.status(404).json("error: No todo found with that id");
+	}else{
+		todos=_.without(todos,matchedToDo);
+		res.json(matchedToDo);
+		for (var i =0 ; i<todos.length;i++) {
+			todos[i].id = i+1;
+		}
+		
+	}
+});
+
 app.listen(port,function() {
 	console.log('express listening on port '+ port + '!!');
 });
