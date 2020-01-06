@@ -43,7 +43,7 @@ app.post('/todos',function(req,res) {
 
 	body.description = 	body.description.trim();
 
-	body.id = todoNextId++;
+	body.id = todos.length+1;
 	todos.push(body);
 
 	console.log('description: '+body.description);
@@ -64,6 +64,31 @@ app.delete('/todos/:id',function(req,res) {
 		}
 		
 	}
+});
+
+app.put('/todos/:id',function(req,res) {
+	var todoId = parseInt(req.params.id,10);	
+	var matchedToDo = _.findWhere(todos,{id:todoId});
+	var body=_.pick(req.body,'description','completed');
+	var validAttributes = {};
+
+	if(!matchedToDo){
+		return res.status(404).send;
+	}
+	if (body.hasOwnProperty('completed')&& _.isBoolean(body.completed)) {
+		validAttributes.completed = body.completed;
+	}else if(body.hasOwnProperty('completed')){
+		return	response.status(400).send();
+	}
+
+	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length>0) {
+		validAttributes.description = body.description;
+	}else if(body.hasOwnProperty('description')){
+		return response.status(400).send();
+	}
+
+	_.extend(matchedToDo,validAttributes);
+	res.json(matchedToDo);
 });
 
 app.listen(port,function() {
