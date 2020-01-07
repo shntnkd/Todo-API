@@ -13,6 +13,7 @@ app.get('/', function(req, res) {
 	res.send('TODO API Root');
 });
 
+
 app.get('/todos', function(req, res) {
 	var queryParams = req.query;
 	var filteredTodos = todos;
