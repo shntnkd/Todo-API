@@ -21,7 +21,7 @@ var Todo = sequelize.define('todo', {
 
 	}
 
-})
+});
 
 sequelize.sync({
 	// force: true

@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var db = require('./db.js');
 
 var port = process.env.PORT || 3000;
 var todos = [];
@@ -42,8 +43,8 @@ app.get('/todos', function(req, res) {
 });
 
 app.get('/todos/:id', function(req, res) {
-var todoId = parseInt(req.params.id, 10);
-	  		var matchedToDo = _.findWhere(todos, {
+	var todoId = parseInt(req.params.id, 10);
+	var matchedToDo = _.findWhere(todos, {
 		id: todoId
 	});
 	/*var matchedToDo;
@@ -62,18 +63,25 @@ var todoId = parseInt(req.params.id, 10);
 })
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
+	db.todo.create(body).then(function(todo) {
+		res.json(todo.toJSON())
 
-	if (!_.isBoolean(body.completed) || !_.isString(body.description) || !body.description.trim().length === 0) {
-		return res.status(400).send();
-	}
+	}, function(e) {
+		res.status(400).json(e);
 
-	body.description = body.description.trim();
+	});
 
-	body.id = todos.length + 1;
-	todos.push(body);
+	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || !body.description.trim().length === 0) {
+	// 	return res.status(400).send();
+	// }
 
-	console.log('description: ' + body.description);
-	res.json(body);
+	// body.description = body.description.trim();
+
+	// body.id = todos.length + 1;
+	// todos.push(body);
+
+	// console.log('description: ' + body.description);
+	// res.json(body);
 
 });
 
@@ -103,7 +111,7 @@ app.put('/todos/:id', function(req, res) {
 	var validAttributes = {};
 
 	if (!matchedToDo) {
-		return res.status(404).send;
+		return f.status(404).send;
 	}
 	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
 		validAttributes.completed = body.completed;
@@ -121,6 +129,8 @@ app.put('/todos/:id', function(req, res) {
 	res.json(matchedToDo);
 });
 
-app.listen(port, function() {
-	console.log('express listening on port ' + port + '!!');
+db.sequelize.sync().then(function() {
+	app.listen(port, function() {
+		console.log('express listening on port ' + port + '!!');
+	});
 });
